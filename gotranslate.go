@@ -122,7 +122,7 @@ func translationRequest(text string, from Lang, to Lang) (string, error) {
 	text = strings.Replace(text, "]", "", -1)
 	text = strings.Replace(text, ",", " ", -1)
 
-	URL.Path += "/translate_a/t"
+	URL.Path += "/"
 	parameters := url.Values{}
 	parameters.Add("client", "t")
 	parameters.Add("text", text)
@@ -150,17 +150,17 @@ func translationRequest(text string, from Lang, to Lang) (string, error) {
 
 	contents, err := ioutil.ReadAll(resp.Body)
 	check(err)
-	reg, err := regexp.Compile("\"(.+?)\"")
+	reg, err := regexp.Compile("TRANSLATED_TEXT='(?P<text>.+?)'")
 	check(err)
 
 	var allStrings []string
-	allStrings = reg.FindAllString(string(contents), 2)
+	allStrings = reg.FindStringSubmatch(string(contents))
 
-	if len(allStrings) < 1 {
+	if len(allStrings) < 2 {
 		return "", ErrNoTranslation
 	}
 
-	s := allStrings[0]
+	s := allStrings[1]
 	s = strings.Trim(s, "\"")
 	return s, nil
 }
